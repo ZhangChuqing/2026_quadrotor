@@ -27,31 +27,31 @@
  *                            PID参数
  ******************************************************************************/
 // 云台Yaw电机 (GM6020)
-#define YAW_OUTER_KP                  30.0f    // 40.0f
-#define YAW_OUTER_KI                  0.0f     // 0.0f
-#define YAW_OUTER_KD                  100.0f     // 300.0f
-#define YAW_OUTER_OUT_LIMIT           100.0f   // 5000.0f
-#define YAW_OUTER_IOUT_LIMIT          0.0f     // 0.0f
-#define YAW_INNER_KP                  13000.0f // 7000.0f
-#define YAW_INNER_KI                  0.0f     // 0.0f
-#define YAW_INNER_KD                  0.0f     // 250.0f
-#define YAW_INNER_OUT_LIMIT           25000.0f // 25000.0f
-#define YAW_INNER_IOUT_LIMIT          0.0f     // 10000.0f
-#define YAW_INNER_LOWPASS_FILTER_PARA 1.0f     // 0.4f
+#define YAW_OUTER_KP                  13.0f // 40.0f
+#define YAW_OUTER_KI                  0.0f      // 0.0f
+#define YAW_OUTER_KD                  0.0f      // 300.0f
+#define YAW_OUTER_OUT_LIMIT           15.0f      // 15.0f
+#define YAW_OUTER_IOUT_LIMIT          0.0f      // 0.0f
+#define YAW_INNER_KP                  7000.0f   // 7000.0f
+#define YAW_INNER_KI                  0.0f      // 0.0f
+#define YAW_INNER_KD                  1.0f      // 250.0f
+#define YAW_INNER_OUT_LIMIT           25000.0f  // 25000.0f
+#define YAW_INNER_IOUT_LIMIT          0.0f      // 10000.0f
+#define YAW_INNER_LOWPASS_FILTER_PARA 0.9f      // 0.4f
 // 云台Pitch电机
-#define PITCH_OUTER_KP                  2.0f // 外环
+#define PITCH_OUTER_KP                  10.0f // 外环
 #define PITCH_OUTER_KI                  2.0f
 #define PITCH_OUTER_KD                  0.0f
-#define PITCH_OUTER_OUT_LIMIT           10.0f
+#define PITCH_OUTER_OUT_LIMIT           10.f
 #define PITCH_OUTER_IOUT_LIMIT          0.5f
-#define PITCH_INNER_KP                  0.15f // 内环
+#define PITCH_INNER_KP                  0.55f // 内环
 #define PITCH_INNER_KI                  0.0f
 #define PITCH_INNER_KD                  0.05f
-#define PITCH_INNER_OUT_LIMIT           0.0f
+#define PITCH_INNER_OUT_LIMIT           10.0f
 #define PITCH_INNER_IOUT_LIMIT          0.0f
 #define PITCH_INNER_LOWPASS_FILTER_PARA 0.6f
 // 重力补偿前馈（Nm）
-#define PITCH_GRAVITY_COMPENSATE 0.6f
+#define PITCH_GRAVITY_COMPENSATE 0.0f
 // 底盘跟随
 #define CHASSIS_FOLLOW_KP 2.0f
 // 摩擦轮
@@ -99,10 +99,10 @@
 /******************************************************************************
  *                            云台角度限制
  ******************************************************************************/
-#define PITCH_UPPER_LIMIT 0.65f
-#define PITCH_LOWER_LIMIT -0.40f
-#define YAW_UPPER_LIMIT   1.0f
-#define YAW_LOWER_LIMIT   -1.0f
+#define PITCH_UPPER_LIMIT 0.2f
+#define PITCH_LOWER_LIMIT -0.35f
+#define YAW_UPPER_LIMIT   0.87f
+#define YAW_LOWER_LIMIT   -0.87f
 /******************************************************************************
  *                            发射机构参数
  ******************************************************************************/
