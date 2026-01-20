@@ -61,11 +61,11 @@
 #define FRICTION_OUT_LIMIT  15000.0f
 #define FRICTION_IOUT_LIMIT 2000.0f
 // 拨弹轮
-#define RAMMER_KP         3000.0f
-#define RAMMER_KI         10.0f
+#define RAMMER_KP         2000.0f
+#define RAMMER_KI         8.0f
 #define RAMMER_KD         0.0f
-#define RAMMER_OUT_LIMIT  8000.0f
-#define RAMMER_IOUT_LIMIT 1000.0f
+#define RAMMER_OUT_LIMIT  10000.0f
+#define RAMMER_IOUT_LIMIT 3000.0f
 
 /******************************************************************************
  *                            IMU参数
@@ -106,7 +106,7 @@
 /******************************************************************************
  *                            发射机构参数
  ******************************************************************************/
-#define FRICTION_TARGET_ANGULAR_VELOCITY     720.0f
+#define FRICTION_TARGET_ANGULAR_VELOCITY     -720.0f
 #define RAMMER_TARGET_ANGULAR_VELOCITY       2.0f * MATH_PI
 #define RAMMER_STUCK_TIMEOUT                 1.0f
 #define RAMMER_REVERT_TIME                   2.0f

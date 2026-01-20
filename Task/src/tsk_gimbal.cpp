@@ -53,15 +53,23 @@ CascadePID::PIDParam pitchInnerParam = {
 LowPassFilter<fp32> pitchInnerLPF(PITCH_INNER_LOWPASS_FILTER_PARA);
 CascadePID pitchPID(pitchOuterParam, pitchInnerParam, nullptr, &pitchInnerLPF);
 // Friction
-SimplePID::PIDParam frictionPIDParam = {
+SimplePID::PIDParam leftfrictionPIDParam = {
     FRICTION_KP,        // Kp
     FRICTION_KI,        // Ki
     FRICTION_KD,        // Kd
     FRICTION_OUT_LIMIT, // outputLimit
     FRICTION_IOUT_LIMIT // intergralLimit
 };
-SimplePID leftFrictionPID(SimplePID::PID_POSITION, frictionPIDParam);
-SimplePID rightFrictionPID(SimplePID::PID_POSITION, frictionPIDParam);
+SimplePID::PIDParam rightfrictionPIDParam = {
+    FRICTION_KP,        // Kp
+    FRICTION_KI,        // Ki
+    FRICTION_KD,        // Kd
+    FRICTION_OUT_LIMIT, // outputLimit
+    FRICTION_IOUT_LIMIT // intergralLimit
+};
+
+SimplePID leftFrictionPID(SimplePID::PID_POSITION, leftfrictionPIDParam);
+SimplePID rightFrictionPID(SimplePID::PID_POSITION, rightfrictionPIDParam);
 // Rammer
 SimplePID::PIDParam rammerPIDParam = {
     RAMMER_KP,        // Kp
@@ -77,8 +85,8 @@ SimplePID rammerPID(SimplePID::PID_POSITION, rammerPIDParam);
 
 MotorGM6020 yawMotor(1, &yawPID, 7031);
 MotorDM4310 pitchMotor(1, 0, 3.141593f, 30, 10, &pitchPID);
-MotorM2006 rammerMotor(7, &rammerPID, 0, 36);
-MotorM3508 leftFrictionMotor(1, &leftFrictionPID);
+MotorM2006 rammerMotor(6, &rammerPID, 0, 36);
+MotorM3508 leftFrictionMotor(4, &leftFrictionPID);
 MotorM3508 rightFrictionMotor(2, &rightFrictionPID);
 
 /******************************************************************************

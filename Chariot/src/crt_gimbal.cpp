@@ -261,7 +261,7 @@ void Gimbal::shootControl()
     }
 
     if (m_rammerState) {
-        m_rammerMotor->angularVelocityClosedloopControl(-RAMMER_TARGET_ANGULAR_VELOCITY);
+        m_rammerMotor->angularVelocityClosedloopControl(RAMMER_TARGET_ANGULAR_VELOCITY);
         rammerStuckControl();
     } else {
         m_rammerMotor->angularVelocityClosedloopControl(0.0f);
