@@ -115,5 +115,5 @@
 /******************************************************************************
  *                            发射机构参数计算
  ******************************************************************************/
-#define RAMMER_SINGLE_SHOT_REVOLUTIONS 0.125f                                                                                                                   // 一圈八个小葡萄，motor类里面已存在解算
+#define RAMMER_SINGLE_SHOT_REVOLUTIONS (0.125f * 36.0f)                                                                                                         // 一圈八个小葡萄，motor类里面未对currentangle做减速比处理但是对currentangularvelocity做了，所以这里要乘减速比
 #define SINGLE_SHOT_TARGET(cur)        (floor((cur) / RAMMER_SINGLE_SHOT_REVOLUTIONS + 0.5f) * RAMMER_SINGLE_SHOT_REVOLUTIONS + RAMMER_SINGLE_SHOT_REVOLUTIONS) // 计算转动所需圈数

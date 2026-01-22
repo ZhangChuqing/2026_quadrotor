@@ -65,8 +65,8 @@ private:
     // 发射机构相关量
     bool m_rammerState;   // false: 停止 true: 发射
     bool m_frictionState; // false: 停止 true: 启动
-    bool m_singularShotState; // 单发状态
-    fp32 m_singularShotTargetRevolutions; // 单发目标转数
+    bool m_singleShotState; // 单发状态
+    fp32 m_singleShotTargetRevolutions; // 单发目标转数
     fp32 m_lastScrollWheel; // 上次滚轮值
 
     // 遥控器
