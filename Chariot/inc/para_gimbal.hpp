@@ -27,17 +27,17 @@
  *                            PID参数
  ******************************************************************************/
 // 云台Yaw电机 (GM6020)
-#define YAW_OUTER_KP                  13.0f // 40.0f
-#define YAW_OUTER_KI                  0.0f      // 0.0f
-#define YAW_OUTER_KD                  0.0f      // 300.0f
-#define YAW_OUTER_OUT_LIMIT           15.0f      // 15.0f
-#define YAW_OUTER_IOUT_LIMIT          0.0f      // 0.0f
-#define YAW_INNER_KP                  7000.0f   // 7000.0f
-#define YAW_INNER_KI                  0.0f      // 0.0f
-#define YAW_INNER_KD                  1.0f      // 250.0f
-#define YAW_INNER_OUT_LIMIT           25000.0f  // 25000.0f
-#define YAW_INNER_IOUT_LIMIT          0.0f      // 10000.0f
-#define YAW_INNER_LOWPASS_FILTER_PARA 0.9f      // 0.4f
+#define YAW_OUTER_KP                  13.0f    // 40.0f
+#define YAW_OUTER_KI                  0.0f     // 0.0f
+#define YAW_OUTER_KD                  0.0f     // 300.0f
+#define YAW_OUTER_OUT_LIMIT           15.0f    // 15.0f
+#define YAW_OUTER_IOUT_LIMIT          0.0f     // 0.0f
+#define YAW_INNER_KP                  7000.0f  // 7000.0f
+#define YAW_INNER_KI                  0.0f     // 0.0f
+#define YAW_INNER_KD                  1.0f     // 250.0f
+#define YAW_INNER_OUT_LIMIT           25000.0f // 25000.0f
+#define YAW_INNER_IOUT_LIMIT          0.0f     // 10000.0f
+#define YAW_INNER_LOWPASS_FILTER_PARA 0.9f     // 0.4f
 // 云台Pitch电机
 #define PITCH_OUTER_KP                  7.0f // 外环
 #define PITCH_OUTER_KI                  0.0f
@@ -111,3 +111,9 @@
 #define RAMMER_STUCK_TIMEOUT                 1.0f
 #define RAMMER_REVERT_TIME                   2.0f
 #define RAMMER_STUCK_REVERT_ANGULAR_VELOCITY 1.0f * MATH_PI
+
+/******************************************************************************
+ *                            发射机构参数计算
+ ******************************************************************************/
+#define RAMMER_SINGLE_SHOT_REVOLUTIONS 0.125f                                                                                                                   // 一圈八个小葡萄，motor类里面已存在解算
+#define SINGLE_SHOT_TARGET(cur)        (floor((cur) / RAMMER_SINGLE_SHOT_REVOLUTIONS + 0.5f) * RAMMER_SINGLE_SHOT_REVOLUTIONS + RAMMER_SINGLE_SHOT_REVOLUTIONS) // 计算转动所需圈数

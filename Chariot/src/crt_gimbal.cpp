@@ -12,6 +12,7 @@
  */
 /* Includes ------------------------------------------------------------------*/
 #include "crt_gimbal.hpp"
+#include "para_gimbal.hpp"
 #include "tsk_isr.hpp"
 #include "drv_misc.h"
 #include <math.h>
@@ -42,6 +43,7 @@ Gimbal::Gimbal(MotorGM6020 *yawMotor, MotorDM4310 *pitchMotor, MotorM2006 *ramme
       m_gimbalTargetSpeed(0),
       m_chassisTargetSpeed(0),
       m_rammerState(false), m_frictionState(false),
+        m_singularShotState(false), m_singularShotTargetRevolutions(0.0f), m_lastScrollWheel(0.0f),
       m_remoteControl(),
       m_isInitComplete(false) {}
 
@@ -174,10 +176,25 @@ void Gimbal::shootPlan()
                 m_frictionState = !m_frictionState;
             }
 
+            //连发
             if ((m_remoteControl.getLeftSwitchStatus() == Dr16RemoteControl::SwitchStatus3Pos::SWITCH_DOWN) && m_frictionState && (m_leftShooterHeat < 350)) {
                 m_rammerState = true;
             } else {
                 m_rammerState = false;
+            }
+
+            //单发
+            {
+                fp32 currentScrollWheel = m_remoteControl.getScrollWheel();
+                if (m_remoteControl.getLeftSwitchStatus() == Dr16RemoteControl::SwitchStatus3Pos::SWITCH_DOWN && m_frictionState) {
+                   if(fabs(currentScrollWheel)>0.5f && fabs(m_lastScrollWheel)<=0.5f){
+                    if(!m_singularShotState){
+                       m_singularShotState = true;
+                       m_singularShotTargetRevolutions = SINGLE_SHOT_TARGET(m_rammerMotor->getCurrentRevolutions());
+                   }
+                   }
+                }
+                m_lastScrollWheel = currentScrollWheel;
             }
             break;
 
