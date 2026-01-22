@@ -39,17 +39,17 @@
 #define YAW_INNER_IOUT_LIMIT          0.0f      // 10000.0f
 #define YAW_INNER_LOWPASS_FILTER_PARA 0.9f      // 0.4f
 // 云台Pitch电机
-#define PITCH_OUTER_KP                  10.0f // 外环
-#define PITCH_OUTER_KI                  2.0f
+#define PITCH_OUTER_KP                  7.0f // 外环
+#define PITCH_OUTER_KI                  0.0f
 #define PITCH_OUTER_KD                  0.0f
-#define PITCH_OUTER_OUT_LIMIT           10.f
-#define PITCH_OUTER_IOUT_LIMIT          0.5f
+#define PITCH_OUTER_OUT_LIMIT           10.0f
+#define PITCH_OUTER_IOUT_LIMIT          0.0f
 #define PITCH_INNER_KP                  0.55f // 内环
 #define PITCH_INNER_KI                  0.0f
 #define PITCH_INNER_KD                  0.05f
 #define PITCH_INNER_OUT_LIMIT           10.0f
 #define PITCH_INNER_IOUT_LIMIT          0.0f
-#define PITCH_INNER_LOWPASS_FILTER_PARA 0.6f
+#define PITCH_INNER_LOWPASS_FILTER_PARA 0.4f
 // 重力补偿前馈（Nm）
 #define PITCH_GRAVITY_COMPENSATE 0.0f
 // 底盘跟随

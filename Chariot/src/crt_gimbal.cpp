@@ -102,27 +102,27 @@ void Gimbal::receiveRemoteControlDataFromISR(const uint8_t *rxData)
 void Gimbal::modeSelect()
 {
     m_remoteControl.updateEvent();
-    if (!m_remoteControl.isDr16RemoteControlConnected()) {
+    if (!m_remoteControl.isConnected()) {
         m_gimbalMode  = GIMBAL_NO_FORCE;
         m_chassisMode = CHASSIS_NO_FORCE;
         return;
     }
 
     switch (m_remoteControl.getRightSwitchStatus()) {
-        case Dr16RemoteControl::SWITCH_DOWN:
+        case Dr16RemoteControl::SwitchStatus3Pos::SWITCH_DOWN:
             m_gimbalMode  = GIMBAL_NO_FORCE;
             m_chassisMode = CHASSIS_NO_FORCE;
-            if (m_remoteControl.getLeftSwitchEvent() == Dr16RemoteControl::SWITCH_TOGGLE_MIDDLE_UP) {
+            if (m_remoteControl.getLeftSwitchEvent() == Dr16RemoteControl::SwitchEvent3Pos::SWITCH_TOGGLE_MIDDLE_UP) {
                 m_gimbalMode = CALIBRATION;
             }
             break;
 
-        case Dr16RemoteControl::SWITCH_MIDDLE:
+        case Dr16RemoteControl::SwitchStatus3Pos::SWITCH_MIDDLE:
             m_gimbalMode  = MANUAL_CONTROL;
             m_chassisMode = FOLLOW_GIMBAL;
             break;
 
-        case Dr16RemoteControl::SWITCH_UP:
+        case Dr16RemoteControl::SwitchStatus3Pos::SWITCH_UP:
             m_gimbalMode  = AUTO_CONTROL;
             m_chassisMode = NO_FOLLOW;
             break;
@@ -170,11 +170,11 @@ void Gimbal::shootPlan()
 {
     switch (m_gimbalMode) {
         case MANUAL_CONTROL:
-            if (m_remoteControl.getLeftSwitchEvent() == Dr16RemoteControl::SWITCH_TOGGLE_MIDDLE_UP) {
+            if (m_remoteControl.getLeftSwitchEvent() == Dr16RemoteControl::SwitchEvent3Pos::SWITCH_TOGGLE_MIDDLE_UP) {
                 m_frictionState = !m_frictionState;
             }
 
-            if ((m_remoteControl.getLeftSwitchStatus() == Dr16RemoteControl::SWITCH_DOWN) && m_frictionState && (m_leftShooterHeat < 350)) {
+            if ((m_remoteControl.getLeftSwitchStatus() == Dr16RemoteControl::SwitchStatus3Pos::SWITCH_DOWN) && m_frictionState && (m_leftShooterHeat < 350)) {
                 m_rammerState = true;
             } else {
                 m_rammerState = false;
