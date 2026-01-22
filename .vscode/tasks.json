@@ -4,35 +4,35 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "${command:eide.project.build}",
+            "command": "${command:cmake.project.build}",
             "group": "build",
             "problemMatcher": []
         },
         {
             "label": "flash",
             "type": "shell",
-            "command": "${command:eide.project.uploadToDevice}",
+            "command": "${command:cmake.project.uploadToDevice}",
             "group": "build",
             "problemMatcher": []
         },
         {
             "label": "build and flash",
             "type": "shell",
-            "command": "${command:eide.project.buildAndFlash}",
+            "command": "${command:cmake.project.buildAndFlash}",
             "group": "build",
             "problemMatcher": []
         },
         {
             "label": "rebuild",
             "type": "shell",
-            "command": "${command:eide.project.rebuild}",
+            "command": "${command:cmake.project.rebuild}",
             "group": "build",
             "problemMatcher": []
         },
         {
             "label": "clean",
             "type": "shell",
-            "command": "${command:eide.project.clean}",
+            "command": "${command:cmake.project.clean}",
             "group": "build",
             "problemMatcher": []
         }
