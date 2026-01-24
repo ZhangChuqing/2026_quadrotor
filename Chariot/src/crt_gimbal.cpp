@@ -243,21 +243,19 @@ void Gimbal::shootControl()
     }
 
     if (m_frictionState) {
-        m_frictionLeftMotor->angularVelocityClosedloopControl(FRICTION_TARGET_ANGULAR_VELOCITY);
-        m_frictionRightMotor->angularVelocityClosedloopControl(-FRICTION_TARGET_ANGULAR_VELOCITY);
-    } 
-    // else {
-    //    m_frictionLeftMotor->angularVelocityClosedloopControl(0.0f);
-    //    m_frictionRightMotor->angularVelocityClosedloopControl(0.0f);
-    //}
+        m_frictionLeftMotor->angularVelocityClosedloopControl(-FRICTION_TARGET_ANGULAR_VELOCITY);
+        m_frictionRightMotor->angularVelocityClosedloopControl(FRICTION_TARGET_ANGULAR_VELOCITY);
+    } else { 
+        m_frictionLeftMotor->angularVelocityClosedloopControl(0.0f);
+        m_frictionRightMotor->angularVelocityClosedloopControl(0.0f);
+    }
 
     if (m_rammerState) {
         m_rammerMotor->angularVelocityClosedloopControl(RAMMER_TARGET_ANGULAR_VELOCITY);
         rammerStuckControl();
         m_singleShotState = false;
-
     } else if (m_singleShotState) {
-        if (fabs(m_rammerMotor->getCurrentRevolutions() - m_singleShotTargetRevolutions) < 0.1f) {
+        if (m_rammerMotor->getCurrentRevolutions() >= m_singleShotTargetRevolutions) {
             m_singleShotState = false;
             m_rammerMotor->angularVelocityClosedloopControl(0.0f);
         } else {
@@ -265,7 +263,7 @@ void Gimbal::shootControl()
             rammerStuckControl();
         }
     } else {
-        m_rammerMotor->angularVelocityClosedloopControl(0.0f);
+        m_rammerMotor->angularVelocityClosedloopControl(0.0f);      
     }
 }
 
@@ -309,10 +307,9 @@ void Gimbal::transmitGimbalMotorData()
     HAL_CAN_AddTxMessage(&hcan1, m_frictionLeftMotor->getMotorControlHeader(), (*m_frictionLeftMotor + *m_frictionRightMotor).getMotorControlData(), NULL);
 }
 
-void Gimbal::transmitChassisData()
+inline void Gimbal::setPitchAngle(const fp32 &targetAngle)
 {
-}
-
+    if (targetAngle > PITCH_UPPER_LIMIT)
         m_pitchTargetAngle = PITCH_UPPER_LIMIT;
     else if (targetAngle < PITCH_LOWER_LIMIT)
         m_pitchTargetAngle = PITCH_LOWER_LIMIT;

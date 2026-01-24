@@ -92,7 +92,7 @@
 /******************************************************************************
  *                            遥控器灵敏度与死区
  ******************************************************************************/
-#define DT7_STICK_DEAD_ZONE         0.20f
+#define DT7_STICK_DEAD_ZONE         0.05f
 #define DT7_STICK_PITCH_SENSITIVITY 0.01f
 #define DT7_STICK_YAW_SENSITIVITY   0.01f
 
@@ -106,8 +106,8 @@
 /******************************************************************************
  *                            发射机构参数
  ******************************************************************************/
-#define FRICTION_TARGET_ANGULAR_VELOCITY     -720.0f
-#define RAMMER_TARGET_ANGULAR_VELOCITY       2.0f * MATH_PI
+#define FRICTION_TARGET_ANGULAR_VELOCITY     760.0f
+#define RAMMER_TARGET_ANGULAR_VELOCITY       2.6f * MATH_PI//这个拨弹和摩擦速度貌似都有一点快了
 #define RAMMER_STUCK_TIMEOUT                 1.0f
 #define RAMMER_REVERT_TIME                   2.0f
 #define RAMMER_STUCK_REVERT_ANGULAR_VELOCITY 1.0f * MATH_PI
