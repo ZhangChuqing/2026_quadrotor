@@ -39,6 +39,9 @@ Gimbal::Gimbal(MotorGM6020 *yawMotor, MotorDM4310 *pitchMotor, MotorM2006 *ramme
       m_imu(imu),
       m_gimbalMode(GIMBAL_NO_FORCE),
       m_yawTargetAngle(0.0f), m_pitchTargetAngle(0.0f),
+      // m_chassisMode(CHASSIS_NO_FORCE),
+      m_gimbalTargetSpeed(0),
+      //   m_chassisTargetSpeed(0),
       m_rammerState(false), m_frictionState(false),
       m_singleShotState(false), m_singleShotTargetRevolutions(0.0f), m_lastScrollWheel(0.0f),
       m_remoteControl(),
@@ -59,11 +62,14 @@ void Gimbal::controlLoop()
     if (!m_isInitComplete) return;
     modeSelect();
     targetOrientationPlan();
+    targetSpeedPlan();
     shootPlan();
     pitchControl();
     yawControl();
     shootControl();
+    // chassisControl();
     transmitGimbalMotorData();
+    // transmitChassisData();
 }
 
 void Gimbal::imuLoop()
@@ -81,14 +87,14 @@ void Gimbal::receiveGimbalMotorDataFromISR(const can_rx_message_t *rxMessage)
     if (m_frictionRightMotor->decodeCanRxMessageFromISR(rxMessage)) return;
 }
 
-void Gimbal::receiveChassisDataFromISR(const can_rx_message_t *rxMessage)
-{
-    if (rxMessage->header.StdId == 0x601) {
-        m_gameProgress    = rxMessage->data[0];
-        m_leftShooterHeat = (uint16_t)rxMessage->data[2] | ((uint16_t)rxMessage->data[3] << 8);
-        m_currentHP       = (uint16_t)rxMessage->data[5] | ((uint16_t)rxMessage->data[6] << 8);
-    }
-}
+// void Gimbal::receiveChassisDataFromISR(const can_rx_message_t *rxMessage)
+// {
+//     if (rxMessage->header.StdId == 0x601) {
+//         m_gameProgress    = rxMessage->data[0];
+//         m_leftShooterHeat = (uint16_t)rxMessage->data[2] | ((uint16_t)rxMessage->data[3] << 8);
+//         m_currentHP       = (uint16_t)rxMessage->data[5] | ((uint16_t)rxMessage->data[6] << 8);
+//     }
+// }
 
 void Gimbal::receiveRemoteControlDataFromISR(const uint8_t *rxData)
 {
@@ -100,12 +106,14 @@ void Gimbal::modeSelect()
     m_remoteControl.updateEvent();
     if (!m_remoteControl.isConnected()) {
         m_gimbalMode  = GIMBAL_NO_FORCE;
+        m_chassisMode = CHASSIS_NO_FORCE;
         return;
     }
 
     switch (m_remoteControl.getRightSwitchStatus()) {
         case Dr16RemoteControl::SwitchStatus3Pos::SWITCH_DOWN:
             m_gimbalMode  = GIMBAL_NO_FORCE;
+            m_chassisMode = CHASSIS_NO_FORCE;
             if (m_remoteControl.getLeftSwitchEvent() == Dr16RemoteControl::SwitchEvent3Pos::SWITCH_TOGGLE_MIDDLE_UP) {
                 m_gimbalMode = CALIBRATION;
             }
@@ -113,10 +121,12 @@ void Gimbal::modeSelect()
 
         case Dr16RemoteControl::SwitchStatus3Pos::SWITCH_MIDDLE:
             m_gimbalMode  = MANUAL_CONTROL;
+            m_chassisMode = FOLLOW_GIMBAL;
             break;
 
         case Dr16RemoteControl::SwitchStatus3Pos::SWITCH_UP:
             m_gimbalMode  = AUTO_CONTROL;
+            m_chassisMode = NO_FOLLOW;
             break;
 
         default:
@@ -128,8 +138,8 @@ void Gimbal::targetOrientationPlan()
 {
     switch (m_gimbalMode) {
         case MANUAL_CONTROL:
-            setYawAngle(m_yawTargetAngle - rcStickDeadZoneFilter(m_remoteControl.getRightStickX()) * DT7_STICK_YAW_SENSITIVITY*0.6);
-            setPitchAngle(m_pitchTargetAngle - rcStickDeadZoneFilter(m_remoteControl.getRightStickY()) * DT7_STICK_PITCH_SENSITIVITY*0.6);//0.6为遥控器灵敏度精度经检查无法精确到小数点后三位，故再加神秘小常数
+            setYawAngle(m_yawTargetAngle - rcStickDeadZoneFilter(m_remoteControl.getRightStickX()) * DT7_STICK_YAW_SENSITIVITY * 0.6);
+            setPitchAngle(m_pitchTargetAngle - rcStickDeadZoneFilter(m_remoteControl.getRightStickY()) * DT7_STICK_PITCH_SENSITIVITY * 0.6); // 0.6为遥控器灵敏度精度经检查无法精确到小数点后三位，故再加神秘小常数
             break;
 
         case AUTO_CONTROL:
@@ -140,6 +150,24 @@ void Gimbal::targetOrientationPlan()
     }
 }
 
+// void Gimbal::targetSpeedPlan()
+// {
+//     switch (m_gimbalMode) {
+//         case MANUAL_CONTROL:
+//             m_gimbalTargetSpeed.x = m_remoteControl.getLeftStickX();
+//             m_gimbalTargetSpeed.y = m_remoteControl.getLeftStickY();
+//             if (m_chassisMode == NO_FOLLOW)
+//                 m_gimbalTargetSpeed.z = m_remoteControl.getScrollWheel();
+//             break;
+
+//         case AUTO_CONTROL:
+//             break;
+
+//         default:
+//             break;
+//     }
+// }
+
 void Gimbal::shootPlan()
 {
     switch (m_gimbalMode) {
@@ -148,23 +176,23 @@ void Gimbal::shootPlan()
                 m_frictionState = !m_frictionState;
             }
 
-            //连发
+            // 连发
             if ((m_remoteControl.getLeftSwitchStatus() == Dr16RemoteControl::SwitchStatus3Pos::SWITCH_DOWN) && m_frictionState && (m_leftShooterHeat < 350)) {
                 m_rammerState = true;
             } else {
                 m_rammerState = false;
             }
 
-            //单发
+            // 单发
             {
                 fp32 currentScrollWheel = m_remoteControl.getScrollWheel();
                 if (m_remoteControl.getLeftSwitchStatus() == Dr16RemoteControl::SwitchStatus3Pos::SWITCH_DOWN && m_frictionState) {
-                   if(fabs(currentScrollWheel)>0.5f && fabs(m_lastScrollWheel)<=0.5f){
-                    if(!m_singleShotState){
-                       m_singleShotState = true;
-                       m_singleShotTargetRevolutions = SINGLE_SHOT_TARGET(m_rammerMotor->getCurrentRevolutions());
-                   }
-                   }
+                    if (fabs(currentScrollWheel) > 0.5f && fabs(m_lastScrollWheel) <= 0.5f) {
+                        if (!m_singleShotState) {
+                            m_singleShotState             = true;
+                            m_singleShotTargetRevolutions = SINGLE_SHOT_TARGET(m_rammerMotor->getCurrentRevolutions());
+                        }
+                    }
                 }
                 m_lastScrollWheel = currentScrollWheel;
             }
@@ -233,8 +261,8 @@ void Gimbal::yawControl()
 void Gimbal::shootControl()
 {
     if (m_gimbalMode == GIMBAL_NO_FORCE) {
-        m_rammerState   = false;
-        m_frictionState = false;
+        m_rammerState     = false;
+        m_frictionState   = false;
         m_singleShotState = false;
         m_frictionRightMotor->openloopControl(0.0f);
         m_frictionLeftMotor->openloopControl(0.0f);
@@ -300,6 +328,33 @@ void Gimbal::rammerStuckControl()
     }
 }
 
+// void Gimbal::chassisControl()
+// {
+//     switch (m_chassisMode) {
+//         case CHASSIS_NO_FORCE:
+//             m_chassisTargetSpeed = 0.0f;
+//             break;
+
+//         case NO_FOLLOW:
+//             convertGimbalTargetSpeedToChassisTargetSpeed();
+//             break;
+
+//         case FOLLOW_GIMBAL:
+//             m_gimbalTargetSpeed.z = GSRLMath::normalizeDeltaAngle(m_yawMotor->getCurrentAngle()) * CHASSIS_FOLLOW_KP;
+//             GSRLMath::constrain(m_gimbalTargetSpeed.z, 1.0f);
+//             convertGimbalTargetSpeedToChassisTargetSpeed();
+//             break;
+
+//         case SPINNING:
+//             m_gimbalTargetSpeed.z = 1.0f;
+//             convertGimbalTargetSpeedToChassisTargetSpeed();
+//             break;
+
+//         default:
+//             break;
+//     }
+// }
+
 void Gimbal::transmitGimbalMotorData()
 {
     HAL_CAN_AddTxMessage(&hcan1, m_yawMotor->getMotorControlHeader(), (*m_yawMotor + *m_rammerMotor).getMotorControlData(), NULL);
@@ -329,9 +384,12 @@ inline void Gimbal::setYawAngle(const fp32 &targetAngle)
     // m_yawTargetAngle = GSRLMath::normalizeDeltaAngle(targetAngle);
 }
 
-inline void Gimbal::convertGimbalTargetSpeedToChassisTargetSpeed()
-{
-}
+// inline void Gimbal::convertGimbalTargetSpeedToChassisTargetSpeed()
+// {
+//     fp32 deltaAngle = GSRLMath::normalizeDeltaAngle(m_yawMotor->getCurrentAngle() - 0.0f);
+//     Matrix33f transCoordinateMatrix(Matrix33f::ROTATION, deltaAngle, {0.0f, 0.0f, 1.0f});
+//     m_chassisTargetSpeed = transCoordinateMatrix * m_gimbalTargetSpeed;
+// }
 
 inline fp32 Gimbal::rcStickDeadZoneFilter(const fp32 &rcStickValue)
 {
