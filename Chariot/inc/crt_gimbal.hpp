@@ -17,6 +17,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "GSRL.hpp"
 #include "para_gimbal.hpp"
+#include "drv_ws2812.hpp"
 
 /* Exported types ------------------------------------------------------------*/
 
@@ -71,6 +72,9 @@ private:
 
     // 遥控器
     Dr16RemoteControl m_remoteControl;
+
+    // LED Strip
+    WS2812 m_ws2812;
 
     // 标志位
     bool m_isInitComplete;

@@ -38,5 +38,4 @@ void can1RxCallback(can_rx_message_t *pRxMsg)
 void can2RxCallback(can_rx_message_t *pRxMsg)
 {
     gimbal.receiveGimbalMotorDataFromISR(pRxMsg);
-    gimbal.receiveChassisDataFromISR(pRxMsg);
 }

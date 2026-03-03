@@ -16,6 +16,7 @@
 #include "tsk_isr.hpp"
 #include "drv_misc.h"
 #include <math.h>
+#include "tim.h" /* For htim1 */
 
 /* Typedef -------------------------------------------------------------------*/
 
@@ -42,6 +43,7 @@ Gimbal::Gimbal(MotorGM6020 *yawMotor, MotorDM4310 *pitchMotor, MotorM2006 *ramme
       m_rammerState(false), m_frictionState(false),
       m_singleShotState(false), m_singleShotTargetRevolutions(0.0f), m_lastScrollWheel(0.0f),
       m_remoteControl(),
+      m_ws2812(&htim1, TIM_CHANNEL_1),
       m_isInitComplete(false) {}
 
 void Gimbal::init()
@@ -51,6 +53,13 @@ void Gimbal::init()
     CAN_Init(&hcan2, can2RxCallback);
     UART_Init(&huart3, dr16RxCallback, 36);
     m_imu->init();
+    m_ws2812.Init();
+
+    for(int i=0; i<WS2812_LED_NUM; i++) {
+        m_ws2812.SetColor(i, 255, 0, 0);
+    }
+    m_ws2812.Update();
+
     m_isInitComplete = true;
 }
 
@@ -79,15 +88,6 @@ void Gimbal::receiveGimbalMotorDataFromISR(const can_rx_message_t *rxMessage)
     if (m_rammerMotor->decodeCanRxMessageFromISR(rxMessage)) return;
     if (m_frictionLeftMotor->decodeCanRxMessageFromISR(rxMessage)) return;
     if (m_frictionRightMotor->decodeCanRxMessageFromISR(rxMessage)) return;
-}
-
-void Gimbal::receiveChassisDataFromISR(const can_rx_message_t *rxMessage)
-{
-    if (rxMessage->header.StdId == 0x601) {
-        m_gameProgress    = rxMessage->data[0];
-        m_leftShooterHeat = (uint16_t)rxMessage->data[2] | ((uint16_t)rxMessage->data[3] << 8);
-        m_currentHP       = (uint16_t)rxMessage->data[5] | ((uint16_t)rxMessage->data[6] << 8);
-    }
 }
 
 void Gimbal::receiveRemoteControlDataFromISR(const uint8_t *rxData)
@@ -215,7 +215,6 @@ void Gimbal::yawControl()
             break;
 
         case CALIBRATION:
-            // m_yawMotor->setMotorZeroPosition();
             break;
 
         case MANUAL_CONTROL:
@@ -325,8 +324,6 @@ inline void Gimbal::setYawAngle(const fp32 &targetAngle)
         m_yawTargetAngle = YAW_LOWER_LIMIT;
     else
         m_yawTargetAngle = targetAngle;
-    // 借用normalizeDeltaAngle函数将目标角度限制在-PI到PI之间
-    // m_yawTargetAngle = GSRLMath::normalizeDeltaAngle(targetAngle);
 }
 
 inline void Gimbal::convertGimbalTargetSpeedToChassisTargetSpeed()
