@@ -102,6 +102,7 @@ private:
     void pitchControl();
     void yawControl();
     void shootControl();
+    void ledControl();
     void rammerStuckControl();
     void chassisControl();
     void transmitGimbalMotorData();

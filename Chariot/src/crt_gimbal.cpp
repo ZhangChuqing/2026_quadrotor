@@ -19,6 +19,12 @@
 #include "tim.h" /* For htim1 */
 
 /* Typedef -------------------------------------------------------------------*/
+enum LedColor {
+    LED_RED,
+    LED_BLUE,
+};
+static LedColor currentLedColor = LED_RED;
+static bool isLedChanged = true;
 
 /* Define --------------------------------------------------------------------*/
 
@@ -56,7 +62,7 @@ void Gimbal::init()
     m_ws2812.Init();
 
     for(int i=0; i<WS2812_LED_NUM; i++) {
-        m_ws2812.SetColor(i, 255, 0, 0);
+        m_ws2812.SetColor(i, 120, 0, 0);
     }
     m_ws2812.Update();
 
@@ -72,6 +78,7 @@ void Gimbal::controlLoop()
     pitchControl();
     yawControl();
     shootControl();
+    ledControl();
     transmitGimbalMotorData();
 }
 
@@ -296,6 +303,61 @@ void Gimbal::rammerStuckControl()
 
         default:
             break;
+    }
+}
+
+void Gimbal::ledControl()
+{
+    float leftStickX = m_remoteControl.getLeftStickX();
+    static bool isStickReturned = true; 
+
+    if (m_remoteControl.getRightSwitchStatus() == Dr16RemoteControl::SwitchStatus3Pos::SWITCH_MIDDLE) {
+        if (leftStickX < -0.5f) {
+            if (isStickReturned) {
+                currentLedColor = LED_RED;
+                isLedChanged = true;
+                isStickReturned = false;
+            }
+        } else if (leftStickX > 0.5f) {
+            if (isStickReturned) {
+                currentLedColor = LED_BLUE;
+                isLedChanged = true;
+                isStickReturned = false;
+            }
+        } else if (abs(leftStickX) < 0.1f) {
+            isStickReturned = true;
+        }
+    } else {
+        isStickReturned = true;
+    }
+
+    static bool isLedOff = false; 
+
+    if (m_gimbalMode == GIMBAL_NO_FORCE) {
+        if (!isLedOff) {
+            for(int i=0; i<WS2812_LED_NUM; i++) {
+                m_ws2812.SetColor(i, 0, 0, 0);
+            }
+            m_ws2812.Update();
+            isLedOff = true;
+        }
+    } else {
+        if (isLedOff || isLedChanged) {
+            uint8_t r = 0, g = 0, b = 0;
+            switch (currentLedColor) {
+                case LED_RED:   r = 120; g = 0; b = 0; break;
+                case LED_BLUE:  r = 0; g = 0; b = 120; break;
+                default: break;
+            }
+
+            for(int i=0; i<WS2812_LED_NUM; i++) {
+                m_ws2812.SetColor(i, r, g, b);
+            }
+            m_ws2812.Update();
+            
+            isLedChanged = false;
+            isLedOff = false;
+        }
     }
 }
 
