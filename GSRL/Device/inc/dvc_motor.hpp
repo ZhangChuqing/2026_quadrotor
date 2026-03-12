@@ -146,7 +146,7 @@ protected:
 };
 
 /**
- * @brief M2006电机别名
+ * @brief 电机别名
  * @details M2006电机控制逻辑与M3508电机相同
  */
 using MotorM2006 = MotorM3508;

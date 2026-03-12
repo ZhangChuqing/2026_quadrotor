@@ -3,7 +3,7 @@
 #include "stm32f4xx_hal.h"
 #include <cstring>
 
-#define WS2812_LED_NUM 60 
+#define WS2812_LED_NUM 120
 
 class WS2812
 {

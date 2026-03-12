@@ -12,6 +12,8 @@
  */
 /* Includes ------------------------------------------------------------------*/
 #include "crt_gimbal.hpp"
+#include "tsk_isr.hpp"
+#include "dvc_vofa.hpp"
 
 /* Define --------------------------------------------------------------------*/
 /******************************************************************************
@@ -71,23 +73,36 @@ SimplePID::PIDParam rightfrictionPIDParam = {
 SimplePID leftFrictionPID(SimplePID::PID_POSITION, leftfrictionPIDParam);
 SimplePID rightFrictionPID(SimplePID::PID_POSITION, rightfrictionPIDParam);
 // Rammer
-SimplePID::PIDParam rammerPIDParam = {
-    RAMMER_KP,        // Kp
-    RAMMER_KI,        // Ki
-    RAMMER_KD,        // Kd
-    RAMMER_OUT_LIMIT, // outputLimit
-    RAMMER_IOUT_LIMIT // intergralLimit
+// 使用双环PID：外环(位置) -> 内环(速度) -> 电流
+CascadePID::PIDParam rammerOuterParam = {
+    RAMMER_OUTER_KP,
+    RAMMER_OUTER_KI,        
+    RAMMER_OUTER_KD,        
+    RAMMER_OUTER_OUT_LIMIT, // 输出是目标速度
+    RAMMER_OUTER_IOUT_LIMIT 
 };
-SimplePID rammerPID(SimplePID::PID_POSITION, rammerPIDParam);
+
+CascadePID::PIDParam rammerInnerParam = {
+    RAMMER_INNER_KP,
+    RAMMER_INNER_KI,        
+    RAMMER_INNER_KD,        
+    RAMMER_INNER_OUT_LIMIT, // 输出是电流值(10000满量程)
+    RAMMER_INNER_IOUT_LIMIT 
+};
+
+// 使用 CascadePID 替代 SimplePID，模式设为 PID_POSITION (即需要位置和速度反馈)
+CascadePID rammerPID(rammerOuterParam, rammerInnerParam);
 
 /* Motor ---------------------------------------------*/
 
 
-MotorGM6020 yawMotor(1, &yawPID, 7031);
-MotorDM4310 pitchMotor(1, 0, 3.141593f, 30, 10, &pitchPID);
+MotorGM6020 yawMotor(1, &yawPID, 0);
+MotorDM4310 pitchMotor(1, 3, 3.141593f, 30, 10, &pitchPID);
 MotorM2006 rammerMotor(6, &rammerPID, 0, 36);
 MotorM3508 leftFrictionMotor(4, &leftFrictionPID);
 MotorM3508 rightFrictionMotor(2, &rightFrictionPID);
+
+Vofa<4> vofa;
 
 /******************************************************************************
  *                            IMU相关
@@ -115,10 +130,33 @@ Gimbal gimbal(&yawMotor, &pitchMotor, &rammerMotor, &leftFrictionMotor, &rightFr
 
 extern "C" void gimbal_task(void *argument)
 {
+    CAN_Init(&hcan1, can1RxCallback);                  // 初始化CAN1
+    UART_Init(&huart3, dr16RxCallback, 36);            // 初始化DR16串口
+    vofa.Init();                                      // 初始化VOFA
+    
+    // vofa.AddParameterListener目前未实现，暂时注释掉
+    /*
+    vofa.AddParameterListener("data", [](fp32 *newValue) {
+        data = *newValue;
+        printf("TestParameter updated: %f\n", *newValue);
+    });
+    */
+
     TickType_t taskLastWakeTime = xTaskGetTickCount(); // 获取任务开始时间
     gimbal.init();
+    
+    // 拨弹电机PID极性反转
+    rammerMotor.setControllerOutputPolarity(false);
+
     while (1) {
+        // motor.openloopControl(0.0f); // motor未定义
+        // transmitMotorsControlData(); // 函数未定义
         gimbal.controlLoop();
+        vofa.writeData((fp32)rammerMotor.getCurrentTorqueCurrent());
+        vofa.writeData(rammerMotor.getCurrentAngle());
+        vofa.writeData(rammerPID.getOuterLoop().pidGetData().output);
+        vofa.writeData(rammerPID.getInnerLoop().pidGetData().output);
+        vofa.sendFrame();
         vTaskDelayUntil(&taskLastWakeTime, 1); // 确保任务以定周期1ms运行
     }
 }

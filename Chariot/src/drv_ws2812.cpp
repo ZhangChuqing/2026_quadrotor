@@ -118,12 +118,6 @@ extern "C" void DMA2_Stream5_IRQHandler(void)
     }
 }
 
-// extern "C" void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-// {
-//    // If we use Update DMA, we might get accidental interrupts if IT enabled?
-//    // We are not enabling TIM_IT_UPDATE, only TIM_DMA_UPDATE.
-//    // But we reuse the DMA Complete callback?
-// }
 
 void HAL_DMA_TxCpltCallback(DMA_HandleTypeDef *hdma)
 {
@@ -134,9 +128,4 @@ void HAL_DMA_TxCpltCallback(DMA_HandleTypeDef *hdma)
          __HAL_TIM_DISABLE_DMA(&htim1, TIM_DMA_UPDATE);
     }
 }
-
-// We need to register the callback?
-// HAL_DMA_Init does NOT register CpltCallback unless we do it.
-// Or we rely on HAL_TIM_IRQHandler? No.
-// We can just set it in Init.
 
