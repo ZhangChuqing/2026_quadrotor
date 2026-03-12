@@ -51,17 +51,18 @@ vofa.AddParameterListener("rammer_d", [](fp32 *val) {
 #define YAW_INNER_IOUT_LIMIT          0.0f     // 10000.0f
 #define YAW_INNER_LOWPASS_FILTER_PARA 0.9f     // 0.4f
 // 云台Pitch电机
-#define PITCH_OUTER_KP                  1.0f // 外环
+#define PITCH_OUTER_KP                  30.0f // 外环
 #define PITCH_OUTER_KI                  0.0f
-#define PITCH_OUTER_KD                  0.0f
-#define PITCH_OUTER_OUT_LIMIT           0.01f
+#define PITCH_OUTER_KD                  0.1f
+#define PITCH_OUTER_OUT_LIMIT           100.0f
 #define PITCH_OUTER_IOUT_LIMIT          0.0f
-#define PITCH_INNER_KP                  80.0f // 内环
+#define PITCH_INNER_KP                  0.34f // 内环
 #define PITCH_INNER_KI                  0.0f
 #define PITCH_INNER_KD                  0.00f
 #define PITCH_INNER_OUT_LIMIT           10.0f
 #define PITCH_INNER_IOUT_LIMIT          0.0f
 #define PITCH_INNER_LOWPASS_FILTER_PARA 1.0f
+#define PITCH_ZERO_ANGLE                1.0f  // 手动校准零点用，后人不要怀疑自己
 // 重力补偿前馈（Nm）
 #define PITCH_GRAVITY_COMPENSATE 0.0f
 // 摩擦轮

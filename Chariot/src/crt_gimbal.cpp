@@ -238,7 +238,7 @@ void Gimbal::pitchControl()
 
         case MANUAL_CONTROL:
         case AUTO_CONTROL: { // 手动控制和自动控制都使用同样的闭环控制
-            fp32 fdbData[2] = {GSRLMath::normalizeDeltaAngle(m_pitchTargetAngle - m_eulerAngle.y), m_imu->getGyro().y};
+            fp32 fdbData[2] = {GSRLMath::normalizeDeltaAngle(m_pitchTargetAngle - PITCH_ZERO_ANGLE + m_pitchMotor->getCurrentAngle()), m_imu->getGyro().x};  //手动校准零点，这个是“小巧思”，后人不要怀疑自己
             fp32 pidOutput  = m_pitchMotor->externalClosedloopControl(0.0f, fdbData, 2);
 #ifdef PITCH_GRAVITY_COMPENSATE
             fp32 totalTorque = gravityCompensate(pidOutput, m_pitchMotor->getCurrentAngle(), PITCH_GRAVITY_COMPENSATE);
@@ -521,9 +521,9 @@ void Gimbal::ledControl()
 
 void Gimbal::transmitGimbalMotorData()
 {
-    HAL_CAN_AddTxMessage(&hcan1, m_yawMotor->getMotorControlHeader(), (*m_yawMotor + *m_rammerMotor).getMotorControlData(), NULL);
+    //HAL_CAN_AddTxMessage(&hcan1, m_yawMotor->getMotorControlHeader(), (*m_yawMotor + *m_rammerMotor).getMotorControlData(), NULL);
     HAL_CAN_AddTxMessage(&hcan2, m_pitchMotor->getMotorControlHeader(), m_pitchMotor->getMotorControlData(), NULL);
-    HAL_CAN_AddTxMessage(&hcan1, m_frictionLeftMotor->getMotorControlHeader(), (*m_frictionLeftMotor + *m_frictionRightMotor).getMotorControlData(), NULL);
+    //HAL_CAN_AddTxMessage(&hcan1, m_frictionLeftMotor->getMotorControlHeader(), (*m_frictionLeftMotor + *m_frictionRightMotor).getMotorControlData(), NULL);
 }
 
 inline void Gimbal::setPitchAngle(const fp32 &targetAngle)
