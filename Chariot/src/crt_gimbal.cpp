@@ -40,15 +40,13 @@ static bool isLedChanged = true;
  *                            Gimbal类实现
  ******************************************************************************/
 
-extern Vofa<4> vofa;
-
 Gimbal::Gimbal(MotorGM6020 *yawMotor, MotorDM4310 *pitchMotor, MotorM2006 *rammerMotor, MotorM3508 *frictionLeftMotor, MotorM3508 *frictionRightMotor, IMU *imu)
     : m_yawMotor(yawMotor), m_pitchMotor(pitchMotor),
       m_rammerMotor(rammerMotor), m_frictionLeftMotor(frictionLeftMotor), m_frictionRightMotor(frictionRightMotor),
       m_imu(imu),
       m_gimbalMode(GIMBAL_NO_FORCE),
       m_yawTargetAngle(0.0f), m_pitchTargetAngle(0.0f),
-      //m_rammerState(false), 
+      m_rammerState(false), 
       m_frictionState(false),
       m_remoteControl(),
       m_ws2812(&htim1, TIM_CHANNEL_1),
@@ -74,7 +72,6 @@ void Gimbal::init()
 void Gimbal::controlLoop()
 {
     if (!m_isInitComplete) return;
-    vofa.writeData(m_gimbalMode);
     modeSelect();
     targetOrientationPlan();
     shootPlan();
@@ -150,7 +147,7 @@ void Gimbal::targetOrientationPlan()
     }
 }
 
-/*void Gimbal::shootPlan()
+void Gimbal::shootPlan()
 {
     switch (m_gimbalMode) {
         case MANUAL_CONTROL:
@@ -172,8 +169,9 @@ void Gimbal::targetOrientationPlan()
         default:
             break;
     }
-}*/
-void Gimbal::shootPlan()
+}
+
+/*void Gimbal::shootPlan()
 {
     if (m_gimbalMode != MANUAL_CONTROL) return;
 
@@ -209,8 +207,7 @@ void Gimbal::shootPlan()
         lastScrollWheel = currentScrollWheel; 
     }
 
-    /* ---------------- 3. 连发逻辑 (Left Switch Down) ---------------- */
-    // 左拨杆打到下档 -> 开启连发
+        // 左拨杆打到下档 -> 开启连发
     if (m_remoteControl.getLeftSwitchStatus() == Dr16RemoteControl::SwitchStatus3Pos::SWITCH_DOWN) {
         if (m_feederArmed) {
             m_contFireEnable = true;
@@ -224,7 +221,7 @@ void Gimbal::shootPlan()
     // 清除旧逻辑相关的状态变量，防止干扰
     m_downHoldMs = 0;
     m_downLatched = false;
-}
+}*/
 
 void Gimbal::pitchControl()
 {
@@ -238,7 +235,7 @@ void Gimbal::pitchControl()
 
         case MANUAL_CONTROL:
         case AUTO_CONTROL: { // 手动控制和自动控制都使用同样的闭环控制
-            fp32 fdbData[2] = {GSRLMath::normalizeDeltaAngle(m_pitchTargetAngle - PITCH_ZERO_ANGLE + m_pitchMotor->getCurrentAngle()), m_imu->getGyro().x};  //手动校准零点，这个是“小巧思”，后人不要怀疑自己
+            fp32 fdbData[2] = {GSRLMath::normalizeDeltaAngle(m_pitchTargetAngle - m_eulerAngle.y), -m_imu->getGyro().y};
             fp32 pidOutput  = m_pitchMotor->externalClosedloopControl(0.0f, fdbData, 2);
 #ifdef PITCH_GRAVITY_COMPENSATE
             fp32 totalTorque = gravityCompensate(pidOutput, m_pitchMotor->getCurrentAngle(), PITCH_GRAVITY_COMPENSATE);
@@ -277,7 +274,7 @@ void Gimbal::yawControl()
     }
 }
 
-/*void Gimbal::shootControl()
+void Gimbal::shootControl()
 {
     if (m_gimbalMode == GIMBAL_NO_FORCE) {
         m_rammerState   = false;
@@ -336,10 +333,10 @@ void Gimbal::rammerStuckControl()
         default:
             break;
     }
-}*/
-void Gimbal::shootControl()
+}
+
+/*void Gimbal::shootControl()
 {
-    /* ==================== NO_FORCE：全部停机并清状态 ==================== */
     if (m_gimbalMode == GIMBAL_NO_FORCE) {
         m_frictionState  = false;
         m_singleShotReq  = false;
@@ -462,7 +459,7 @@ void Gimbal::rammerStuckControl()
             m_shootState   = stateFeeding; // 解卡完成，回去继续这发
         }
     }
-}
+}*/
 
 void Gimbal::ledControl()
 {

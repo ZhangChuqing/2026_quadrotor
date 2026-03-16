@@ -65,30 +65,36 @@ private:
     Vector3f m_chassisTargetSpeed; // 底盘坐标系下的目标速度
 
    // 发射机构相关量
-    bool m_frictionState  = false; // false: 停止 true: 启动
-    bool m_singleShotReq  = false; // 本周期产生一次单发请求（脉冲）
-    bool m_contFireEnable = false; // 连发使能（按住时为true）
-    bool m_feederArmed    = false; // 允许拨弹（摩擦轮开且热量允许等）
+    bool m_rammerState;   // false: 停止 true: 发射
+    bool m_frictionState; // false: 停止 true: 启动
+    bool m_singleShotState; // 单发状态
+    fp32 m_singleShotTargetRevolutions; // 单发目标转数
+
+    //bool m_frictionState  = false; // false: 停止 true: 启动
+    //bool m_singleShotReq  = false; // 本周期产生一次单发请求（脉冲）
+    //bool m_contFireEnable = false; // 连发使能（按住时为true）
+    //bool m_feederArmed    = false; // 允许拨弹（摩擦轮开且热量允许等）
 
     // 单发/连发判定计时
-    uint32_t m_downHoldMs      = 0; // 左三档保持DOWN计时（ms）
-    bool m_downLatched         = false;
-    uint32_t m_contFireTimerMs = 0; // 连发节拍计时（ms）
+    //uint32_t m_downHoldMs      = 0; // 左三档保持DOWN计时（ms）
+    //bool m_downLatched         = false;
+    //uint32_t m_contFireTimerMs = 0; // 连发节拍计时（ms）
 
     // 拨弹目标多圈（用于 revolutionsClosedloopControl）
-    fp32 m_feederTargetRev = 0.0f;
+    //fp32 m_feederTargetRev = 0.0f;
 
     // Shoot 状态机
-    enum ShootState : uint8_t {
-        stateIdle = 0,
-        stateFeeding,
-        stateUnjamming
-    };
-    ShootState m_shootState = stateIdle;
+    //enum ShootState : uint8_t {
+        //stateIdle = 0,
+        //stateFeeding,
+        //stateUnjamming
+    //};
+    //ShootState m_shootState = stateIdle;
 
     // 卡弹/解卡计数
-    uint32_t m_jamCounter   = 0;
-    uint32_t m_unjamCounter = 0;
+    //uint32_t m_jamCounter   = 0;
+    //uint32_t m_unjamCounter = 0;
+
     // 遥控器
     Dr16RemoteControl m_remoteControl;
 
