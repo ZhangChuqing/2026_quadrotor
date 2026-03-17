@@ -51,15 +51,15 @@ vofa.AddParameterListener("rammer_d", [](fp32 *val) {
 #define YAW_INNER_IOUT_LIMIT          0.0f     // 10000.0f
 #define YAW_INNER_LOWPASS_FILTER_PARA 0.9f     // 0.4f
 // 云台Pitch电机(有nuc版)
-#define PITCH_OUTER_KP                  1.0f // 外环
+#define PITCH_OUTER_KP                  0.1f // 外环
 #define PITCH_OUTER_KI                  0.0f
 #define PITCH_OUTER_KD                  0.0f
-#define PITCH_OUTER_OUT_LIMIT           0.01f
+#define PITCH_OUTER_OUT_LIMIT           0.0f
 #define PITCH_OUTER_IOUT_LIMIT          0.0f
-#define PITCH_INNER_KP                  0.55f // 内环
+#define PITCH_INNER_KP                  0.5f // 内环
 #define PITCH_INNER_KI                  0.0f
 #define PITCH_INNER_KD                  0.00f
-#define PITCH_INNER_OUT_LIMIT           3.0f
+#define PITCH_INNER_OUT_LIMIT           0.0f
 #define PITCH_INNER_IOUT_LIMIT          0.0f
 #define PITCH_INNER_LOWPASS_FILTER_PARA 1.0f
 //无nuc版的pitch参数（需要调整）
@@ -109,8 +109,8 @@ vofa.AddParameterListener("rammer_d", [](fp32 *val) {
 #define MAG_OFFSET_Y   0.0f
 #define MAG_OFFSET_Z   0.0f
 // 安装朝向修正旋转矩阵
-#define INSTALL_SPIN_MATRIX GSRLMath::Matrix33f((fp32[3][3]){{1, 0, 0}, {0, -1, 0}, {0, 0, -1}})
-//#define INSTALL_SPIN_MATRIX GSRLMath::Matrix33f((fp32[3][3]){{0, -1, 0}, {-1, 0, 0}, {0, 0, -1}})
+// #define INSTALL_SPIN_MATRIX GSRLMath::Matrix33f((fp32[3][3]){{1, 0, 0}, {0, -1, 0}, {0, 0, -1}})
+#define INSTALL_SPIN_MATRIX GSRLMath::Matrix33f((fp32[3][3]){{0, -1, 0}, {1, 0, 0}, {0, 0, -1}})
 
 /******************************************************************************
  *                            遥控器灵敏度与死区
