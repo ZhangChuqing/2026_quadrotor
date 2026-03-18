@@ -160,7 +160,8 @@ SimplePID::PIDData SimplePID::pidGetData() const
  */
 CascadePID::CascadePID(PIDParam &outerParam, PIDParam &innerParam, Filter<fp32> *outerFilter, Filter<fp32> *innerFilter)
     : m_outerLoop(SimplePID::PID_POSITION, outerParam, outerFilter),
-      m_innerLoop(SimplePID::PID_POSITION, innerParam, innerFilter)
+    m_innerLoop(SimplePID::PID_POSITION, innerParam, innerFilter),
+    m_innerLoopOutputPolarity(false)
 {
 }
 
@@ -177,7 +178,8 @@ fp32 CascadePID::controllerCalculate(fp32 setPoint, const fp32 *feedBackData, ui
 {
     if (feedBackSize < 2) return 0.0f;
     fp32 innerSetPoint = m_outerLoop.controllerCalculate(setPoint, &feedBackData[0], 1); // 外环计算
-    return m_innerLoop.controllerCalculate(innerSetPoint, &feedBackData[1], 1);          // 内环计算
+    fp32 innerOutput   = m_innerLoop.controllerCalculate(innerSetPoint, &feedBackData[1], 1); // 内环计算
+    return m_innerLoopOutputPolarity ? -innerOutput : innerOutput;
 }
 
 /**
@@ -188,6 +190,15 @@ void CascadePID::cascadeClear()
 {
     m_outerLoop.pidClear();
     m_innerLoop.pidClear();
+}
+
+/**
+ * @brief 设置串级PID内环输出极性
+ * @param polarity true为反转内环输出，false为正常方向
+ */
+void CascadePID::setInnerLoopOutputPolarity(bool polarity)
+{
+    m_innerLoopOutputPolarity = polarity;
 }
 
 /**

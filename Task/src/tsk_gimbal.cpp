@@ -88,7 +88,7 @@ MotorGM6020 yawMotor(1, &yawPID, 0);
 MotorDM4310 pitchMotor(1, 3, 3.141593f, 30, 10, &pitchPID);
 MotorM2006 rammerMotor(6, &rammerPID, 0, 36);
 MotorM3508 leftFrictionMotor(4, &leftFrictionPID);
-MotorM3508 rightFrictionMotor(2, &rightFrictionPID);
+MotorM3508 rightFrictionMotor(1, &rightFrictionPID);
 
 Vofa<4> vofa;
 
@@ -158,6 +158,8 @@ extern "C" void gimbal_task(void *argument)
 
     TickType_t taskLastWakeTime = xTaskGetTickCount(); // 获取任务开始时间
     gimbal.init();
+    // pitchPID.setInnerLoopOutputPolarity(false);
+    // pitchMotor.setControllerOutputPolarity(false);
 
     // 拨弹电机PID极性反转
     //rammerMotor.setControllerOutputPolarity(false);

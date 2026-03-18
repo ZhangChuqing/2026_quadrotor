@@ -51,12 +51,12 @@ vofa.AddParameterListener("rammer_d", [](fp32 *val) {
 #define YAW_INNER_IOUT_LIMIT          0.0f     // 10000.0f
 #define YAW_INNER_LOWPASS_FILTER_PARA 0.9f     // 0.4f
 // 云台Pitch电机(有nuc版)
-#define PITCH_OUTER_KP                  0.2f // 外环
+#define PITCH_OUTER_KP                  30.0f // 外环
 #define PITCH_OUTER_KI                  0.0f
-#define PITCH_OUTER_KD                  0.0f
-#define PITCH_OUTER_OUT_LIMIT           5.0f
-#define PITCH_OUTER_IOUT_LIMIT          0.0f
-#define PITCH_INNER_KP                  0.40f // 内环
+#define PITCH_OUTER_KD                  0.04f
+#define PITCH_OUTER_OUT_LIMIT           5.5f
+#define PITCH_OUTER_IOUT_LIMIT          0.1f
+#define PITCH_INNER_KP                  0.38f // 内环
 #define PITCH_INNER_KI                  0.0f
 #define PITCH_INNER_KD                  0.01f
 #define PITCH_INNER_OUT_LIMIT           5.0f
@@ -122,10 +122,10 @@ vofa.AddParameterListener("rammer_d", [](fp32 *val) {
 /******************************************************************************
  *                            云台角度限制
  ******************************************************************************/
-// #define PITCH_UPPER_LIMIT 0.17f
-// #define PITCH_LOWER_LIMIT -0.43f
-#define PITCH_UPPER_LIMIT -3.0f
-#define PITCH_LOWER_LIMIT 3.0f   
+#define PITCH_UPPER_LIMIT 0.17f
+#define PITCH_LOWER_LIMIT -0.32f
+// #define PITCH_UPPER_LIMIT -3.0f
+// #define PITCH_LOWER_LIMIT 3.0f   
 #define YAW_UPPER_LIMIT   0.78f
 #define YAW_LOWER_LIMIT   -0.78f
 /******************************************************************************

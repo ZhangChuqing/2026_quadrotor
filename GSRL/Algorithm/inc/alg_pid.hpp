@@ -94,11 +94,13 @@ public:
 private:
     SimplePID m_outerLoop;
     SimplePID m_innerLoop;
+    bool m_innerLoopOutputPolarity;
 
 public:
     CascadePID(PIDParam &outerParam, PIDParam &innerParam, Filter<fp32> *outerFilter = nullptr, Filter<fp32> *innerFilter = nullptr);
     fp32 controllerCalculate(fp32 setPoint, const fp32 *feedBackData, uint8_t feedBackSize = 2) override;
     void cascadeClear();
+    void setInnerLoopOutputPolarity(bool polarity);
     SimplePID &getOuterLoop();
     SimplePID &getInnerLoop();
 };
