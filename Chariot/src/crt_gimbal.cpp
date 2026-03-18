@@ -25,8 +25,6 @@ enum LedColor {
 };
 static LedColor currentLedColor = LED_RED;
 static bool isLedChanged = true;
-static constexpr fp32 kRammerFeedDirection   = -1.0f;
-static constexpr fp32 kRammerRevertDirection = -kRammerFeedDirection;
 
 /* Define --------------------------------------------------------------------*/
 
@@ -297,7 +295,7 @@ void Gimbal::shootControl()
     }
 
     if (m_rammerState) {
-        m_rammerMotor->angularVelocityClosedloopControl(kRammerFeedDirection * RAMMER_TARGET_ANGULAR_VELOCITY);
+        m_rammerMotor->angularVelocityClosedloopControl(RAMMER_TARGET_ANGULAR_VELOCITY);
         rammerStuckControl();
     }
     else {
@@ -327,7 +325,7 @@ void Gimbal::rammerStuckControl()
             break;
 
         case 2: // 证实卡弹
-            m_rammerMotor->angularVelocityClosedloopControl(kRammerRevertDirection * RAMMER_STUCK_REVERT_ANGULAR_VELOCITY);
+            m_rammerMotor->angularVelocityClosedloopControl(RAMMER_STUCK_REVERT_ANGULAR_VELOCITY);
             if (((uint32_t)(DWT->CYCCNT - rammerStuckTime)) / ((fp32)(SystemCoreClock)) > RAMMER_REVERT_TIME) {
                 rammerStuckState = 0; // 解除卡弹状态
             }
