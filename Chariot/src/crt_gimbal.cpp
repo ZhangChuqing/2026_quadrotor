@@ -136,7 +136,7 @@ void Gimbal::targetOrientationPlan()
     switch (m_gimbalMode) {
         case MANUAL_CONTROL:
             setYawAngle(m_yawTargetAngle - rcStickDeadZoneFilter(m_remoteControl.getRightStickX()) * DT7_STICK_YAW_SENSITIVITY*0.6);
-            setPitchAngle(m_pitchTargetAngle - rcStickDeadZoneFilter(m_remoteControl.getRightStickY()) * DT7_STICK_PITCH_SENSITIVITY*0.6);//0.6为遥控器灵敏度精度经检查无法精确到小数点后三位，故再加神秘小常数
+            // Pitch锁角：不再跟随右摇杆Y动态变化，保持当前目标角。
             break;
 
         case AUTO_CONTROL:
@@ -235,7 +235,8 @@ void Gimbal::pitchControl()
 
         case MANUAL_CONTROL:
         case AUTO_CONTROL: { // 手动控制和自动控制都使用同样的闭环控制
-            fp32 fdbData[2] = {GSRLMath::normalizeDeltaAngle(m_pitchTargetAngle - m_eulerAngle.y), -m_imu->getGyro().y};
+            // fp32 fdbData[2] = {GSRLMath::normalizeDeltaAngle(m_pitchTargetAngle - m_eulerAngle.y), -m_imu->getGyro().y};
+            fp32 fdbData[2] = {m_pitchTargetAngle - m_eulerAngle.y, -m_imu->getGyro().y};
             fp32 pidOutput  = m_pitchMotor->externalClosedloopControl(0.0f, fdbData, 2);
 #ifdef PITCH_GRAVITY_COMPENSATE
             fp32 totalTorque = gravityCompensate(pidOutput, m_pitchMotor->getCurrentAngle(), PITCH_GRAVITY_COMPENSATE);
